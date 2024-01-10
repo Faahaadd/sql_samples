@@ -1,0 +1,389 @@
+
+---Inspecting Data
+
+select * from [supermarket_sales-Sheet1]
+
+---- Checking unique values
+
+select distinct city from [supermarket_sales-Sheet1]
+select distinct branch from [supermarket_sales-Sheet1]
+select distinct [customer type] from [supermarket_sales-Sheet1]
+select distinct year(date) from [supermarket_sales-Sheet1]
+select distinct month(date) from [supermarket_sales-Sheet1]
+select distinct payment from [supermarket_sales-Sheet1]
+select distinct [Product line] from [supermarket_sales-Sheet1]
+
+-- Earliest and latest dates
+
+select max(date) from [supermarket_sales-Sheet1]
+select min(date) from [supermarket_sales-Sheet1]
+
+
+---ANALYSIS
+
+--- Total sales , cost and profit
+
+select
+month(date) mth,
+round(sum(total),2) total_sales,
+round(sum(cogs),2) cost,
+round(sum([gross income]),2) profit
+from [supermarket_sales-Sheet1]
+group by month(date)
+order by total_sales desc
+
+
+--- Total sales , cost and profit by Quantity
+
+select
+[Product line],
+count(Quantity) Quantity_count,
+sum(Total) Total_sales,
+sum(cogs) Cost,
+sum([gross income]) profit
+from [supermarket_sales-Sheet1]
+group by [Product line]
+order by Quantity_count desc
+
+--- Total Sales per Branch:
+
+select
+Branch,
+round(sum(total),2) total_sales
+from
+[supermarket_sales-Sheet1]
+group by
+Branch
+order by
+total_sales desc
+
+--- Total Sales by Gender:
+
+select
+Gender,
+round(sum(total),2) total_sales
+from
+[supermarket_sales-Sheet1]
+group by
+Gender
+order by
+total_sales desc
+
+
+--- Total Sales by Customer Type:
+
+select
+[Customer type],
+round(sum(total),2) total_sales
+from
+[supermarket_sales-Sheet1]
+group by
+[Customer type]
+order by
+total_sales desc
+
+
+--- Total Sales by Product Line:
+
+select
+[Product line],
+round(sum(total),2) total_sales
+from
+[supermarket_sales-Sheet1]
+group by
+[Product line]
+order by
+total_sales desc
+
+--- Total Sales by month:
+
+
+select
+datename(month,(date)) month,
+round(sum(total),2) total_sales
+from [supermarket_sales-Sheet1]
+group by datename(month,(date))
+order by
+case
+datename(month,(date))
+when 'January' then 1
+when 'February' then 2
+when 'March' then 3
+end
+
+
+--- Total Sales by Weekdays:
+
+select
+DATENAME(WEEKDAY,[date]) weekdays,
+round(sum(total),2) total_sales
+from
+[supermarket_sales-Sheet1]
+group by
+DATENAME(WEEKDAY,[date])
+order by
+case
+DATENAME(WEEKDAY,[date])
+
+when 'Monday' then 1
+when 'Tuesday' then 2
+when 'Wednesday' then 3
+when 'Thursday' then 4
+when 'Friday' then 5
+when 'Saturday' then 6
+when 'Sunday' then 7
+end
+
+--- Total Sales by Time Period
+
+select
+total,
+Gender,
+[Product line],
+datename(WEEKDAY,[date]) weekdays,
+case
+when [time] < '12:00' then 'morning'
+when [time] >= '12:00' and [time] < '17:00' then 'afternoon'
+else 'evening'
+end as dayparts
+into timeperiodss
+from [supermarket_sales-Sheet1]
+
+
+select
+weekdays,
+dayparts,
+[Product line],
+Total,
+Gender
+from timeperiodss
+
+
+
+
+--- Total Sales / Gender and Branch
+
+select
+Gender,
+Branch,
+round(sum(total),2) total_sales
+from
+[supermarket_sales-Sheet1]
+group by
+Gender,
+Branch
+order by
+total_sales desc
+
+
+--- Sales / Gender and Products Line
+
+select
+Gender,
+[Product line],
+round(sum(total),2) total_sales
+from
+[supermarket_sales-Sheet1]
+group by
+Gender,
+[Product line]
+order by
+total_sales desc
+
+
+--- Sales / Customer Type and Branch
+
+select
+[Customer type],
+Branch,
+round(sum(total),2) total_sales
+from
+[supermarket_sales-Sheet1]
+group by
+[Customer type],
+Branch
+order by
+total_sales desc
+
+
+
+--- Sales / Customer Type and Products
+
+
+select
+[Customer type],
+[Product line],
+round(sum(total),2) total_sales
+from
+[supermarket_sales-Sheet1]
+group by
+[Customer type],
+[Product line]
+order by
+total_sales desc
+
+
+--- Sales / Customer Type and Gender
+
+select
+[Customer type],
+Gender,
+round(sum(total),2) total_sales
+from
+[supermarket_sales-Sheet1]
+group by
+[Customer type],
+Gender
+order by
+total_sales desc
+
+
+--- Sales / Products and Branch
+
+select
+[Product line],
+Branch,
+round(sum(total),2) total_sales
+from
+[supermarket_sales-Sheet1]
+group by
+[Product line],
+Branch
+order by
+total_sales desc
+
+
+
+--- Average Transaction Value
+
+select
+Branch,
+gender,
+[Customer type],
+round(avg(total),2) avg_tran
+from
+[supermarket_sales-Sheet1]
+group by
+Branch,
+gender,
+[Customer type]
+order by
+Branch
+
+
+--- Most Profitable Lines
+
+select
+[Product line],
+sum([gross income]) profit
+from
+[supermarket_sales-Sheet1]
+group by
+[Product line]
+order by
+profit desc
+
+--- Payment Method Analysis
+-- in terms of total sales
+
+--- Sales / Paymenet Method and Branch
+
+select
+Branch,
+[Payment],
+round(sum(total),2) avg_transaction
+from [supermarket_sales-Sheet1]
+group by [Branch],Payment
+order by Payment;
+
+--- Sales / Paymenet Method and Product Line
+
+select
+[Product line],
+[Payment],
+round(sum(total),2) avg_transaction
+from [supermarket_sales-Sheet1]
+group by [Product line], [Payment]
+order by Payment;
+
+--- Total Sales / Payment Method
+
+select
+[Branch],
+[Cash],
+[Credit card],
+[Ewallet]
+from
+(select
+[Payment],
+[Branch],
+total
+from [supermarket_sales-Sheet1]) as src
+pivot(
+sum(total) for [Payment] in ([Cash],[Credit card],[Ewallet])) as pvt
+
+
+-- Total Transactios / Payment Method
+
+select
+payment,
+[A],[B],[C]
+from
+(select
+Branch,
+Payment,
+[Invoice ID]
+from
+[supermarket_sales-Sheet1]) as src
+pivot(
+count([Invoice ID])
+for
+Branch in ([A],[B],[C])) as pvt
+
+
+--- filtering data (Monthly Analysis)
+--- You have the option to modify the condition
+
+select
+datename(MONTH,[date]) mth,
+[Product line],
+Branch,
+Gender,
+[Customer type],
+sum(total) total_sales,
+sum(cogs) cost
+from [supermarket_sales-Sheet1]
+where datename(MONTH,[date]) = 'February'
+and Gender = 'Male'
+and [Customer type] = 'Member'
+and Branch = 'B'
+group by
+datename(MONTH,[date]),
+[Product line],
+Branch,
+Gender,
+[Customer type]
+having sum(total) > 1000
+
+
+--- filtering data (Rating AVG)
+
+select
+[Product line],
+gender,
+DATENAME(month,[date]) mth,
+cast(avg(Rating) as decimal (10,2)) rating_avg
+from [supermarket_sales-Sheet1]
+where DATENAME(month,[date]) = 'January'
+group by
+[Product line],
+gender,
+DATENAME(month,[date])
+order by
+Gender,
+rating_avg desc
+
+
+
+
+
