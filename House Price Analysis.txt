@@ -1,0 +1,132 @@
+select * from housing_price_dataset
+
+--- distinct values
+
+select distinct YearBuilt from housing_price_dataset
+select distinct Neighborhood from housing_price_dataset
+select distinct Bedrooms from housing_price_dataset
+select distinct Bathrooms from housing_price_dataset
+
+--- max value, min value
+
+select max(Price) from housing_price_dataset
+select min(Price) from housing_price_dataset
+select max(YearBuilt) from housing_price_dataset
+select min(YearBuilt) from housing_price_dataset
+select max(SquareFeet) from housing_price_dataset
+select min(SquareFeet) from housing_price_dataset
+
+--- Neighborhood analysis
+-- Total houses per neighborhood
+
+select
+Neighborhood,
+count(SquareFeet) houses
+from housing_price_dataset
+group by Neighborhood
+order by house desc
+
+-- checking house ages
+
+select
+price,
+SquareFeet,
+yearbuilt,
+DATEDIFF(year,yearbuilt,getdate()) house_age
+from housing_price_dataset
+order by house_age desc
+
+-- oldest vs recent house / yearbulit
+
+select
+Neighborhood,
+YearBuilt,
+count(*) houses
+from housing_price_dataset
+where YearBuilt = '2021' --- using condition if needed
+group by
+Neighborhood,
+YearBuilt
+order by YearBuilt desc
+
+-- Total price per neighborhood
+
+select
+Neighborhood,
+count(*) houses,
+round(sum(Price),2) total_price,
+round(avg(Price),2) price_avg
+from housing_price_dataset
+group by
+Neighborhood
+order by
+total_price desc
+
+
+-- Average squarefeet / neighborhood
+
+select
+Neighborhood,
+avg(SquareFeet) squarefeet_avg
+from housing_price_dataset
+group by
+Neighborhood
+order by
+squarefeet_avg desc
+
+-- Highest and lowest price/neighborhood
+
+select
+Neighborhood,
+max(Price) [highest price],
+min(Price) [lowest price]
+from housing_price_dataset
+group by
+Neighborhood
+
+-- Bedrooms/neighborhood
+select
+Neighborhood,
+[Bedrooms],
+count(*) houses,
+round(avg(price),2) price_avg
+from housing_price_dataset
+group by
+Neighborhood,
+[Bedrooms]
+order by
+Bedrooms desc
+
+-- checking average price / bedrooms / neighborhood
+select
+Neighborhood,
+Bedrooms,
+bathrooms,
+price
+from housing_price_dataset
+-- where Bedrooms in (1,2,3,4,5)
+-- and Bathrooms in (1,2,3)
+order by Bedrooms desc
+
+select count (*) , Neighborhood from housing_price_dataset where squarefeet =
+(select max(SquareFeet) from housing_price_dataset)
+group by Neighborhood
+
+select
+SquareFeet,
+neighborhood,
+round(Price,2) desc_price
+from housing_price_dataset
+where SquareFeet = 2999
+order by price desc,
+Neighborhood;
+
+
+
+
+
+
+
+
+
+
